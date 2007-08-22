@@ -16,7 +16,7 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 
 $config = '[file-transport]';
-$argumentConfig = '[receiver][object-id][old-version][new-version]';
+$argumentConfig = '[sender][receiver][object-id][old-version][new-version]';
 $optionHelp = array( 'file-transport' => "Use the file mail transport,\noverrides the configured mail transport\nfor debugging purposes." );
 $arguments = false;
 
@@ -26,15 +26,16 @@ $options = $script->getOptions( $config, $argumentConfig, $optionHelp, $argument
 $script->initialize();
 
 
-if ( count( $options['arguments'] ) < 4 )
+if ( count( $options['arguments'] ) < 5 )
 {
     $script->shutdown( 1, 'wrong argument count' );
 }
 
-$email      = $options['arguments'][0];
-$objectID   = $options['arguments'][1];
-$oldVersion = $options['arguments'][2];
-$newVersion = $options['arguments'][3];
+$sender     = $options['arguments'][0];
+$receiver   = $options['arguments'][1];
+$objectID   = $options['arguments'][2];
+$oldVersion = $options['arguments'][3];
+$newVersion = $options['arguments'][4];
 
 include_once( 'kernel/classes/ezcontentobject.php' );
 $object = eZContentObject::fetch( $objectID );
@@ -68,12 +69,8 @@ $body = $tpl->fetch( 'design:test_html_mail.tpl' );
 include_once( 'lib/ezutils/classes/ezmail.php' );
 $mail = new eZMail();
 
-// Note: Change email receiver to setting
-$mail->setReceiver( 'info@example.com' );
-
-// Note: Change email sender to setting
-$mail->setSender( 'info@example.com' );
-
+$mail->setSender( $sender );
+$mail->setReceiver( $receiver );
 $mail->setBody( $body );
 $mail->setContentType( 'text/html', false, '7bit' );
 $mail->setSubject( 'Test mail diff' );
