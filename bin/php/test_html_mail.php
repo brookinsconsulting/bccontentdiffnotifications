@@ -39,8 +39,25 @@ $newVersion = $options['arguments'][4];
 
 include_once( 'kernel/classes/ezcontentobject.php' );
 $object = eZContentObject::fetch( $objectID );
+
+if ( !is_object( $object ) )
+{
+    $script->shutdown( 2, 'Unable to fetch object with ID ' . $objectID );
+}
+
 $oldObject = $object->version( $oldVersion );
+
+if ( !is_object( $oldObject ) )
+{
+    $script->shutdown( 3, 'Unable to fetch version ' . $oldVersion );
+}
+
 $newObject = $object->version( $newVersion );
+
+if ( !is_object( $newObject ) )
+{
+    $script->shutdown( 3, 'Unable to fetch version ' . $newVersion );
+}
 
 $oldAttributes = $oldObject->dataMap();
 $newAttributes = $newObject->dataMap();
