@@ -7,8 +7,8 @@
 <!--
   div.block { margin-bottom: 1em; }
   label { font-weight: bold; font-size: 120%; }
-  del { background-color: red; }
-  ins { background-color: green; }
+  del { color: #d98078; text-decoration: line-through; }
+  ins { color: #008000; text-decoration: underline; }
 -->
 {/literal}
 </style>
