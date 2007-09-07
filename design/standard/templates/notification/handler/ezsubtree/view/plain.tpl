@@ -1,4 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+{set-block scope=root variable=content_type}text/html{/set-block}
 <html>
 <head>
 <style>
