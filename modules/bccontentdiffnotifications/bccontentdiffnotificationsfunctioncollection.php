@@ -47,24 +47,21 @@ class BcContentDiffNotificationFunctionCollection
     function &fetchLastObjectVersionFetch( $objectID )
     {
         include_once( 'kernel/classes/ezcontentobject.php' );
-	$ret = false;
+        $ret = false;
 
-	// First fetch content object
-	$object = eZContentObject::fetch( $objectID );
+        // First fetch content object
+        $object = eZContentObject::fetch( $objectID );
 
-	// Test result for objectivity
-	if ( is_object( $object ) )
-	{
-	  // Fetch the last version
-	  $oldObject = $object->version( $oldVersion );
+        // Test result for objectivity
+        if ( is_object( $object ) )
+        {
+            // Fetch the current version
+            $version =& $object->currentVersion();
+            $lastVersion = $version->attribute( 'version' ) -1;
+            $lastObject = $object->version( $lastVersion );
 
-	  // Fetch the current version
-	  $version =& $object->currentVersion(); 
-	  $lastVersion = $version->attribute( 'version' ) -1;
-	  $lastObject = $object->version( $lastVersion );  
-
-	  $ret = $lastObject;
-	}
+            $ret = $lastObject;
+        }
 
         return array( 'result' => $ret );
     }
@@ -74,47 +71,45 @@ class BcContentDiffNotificationFunctionCollection
     */
     function &fetchDiffVersionsFetch( $object, $lastVersion )
     {
-	$ret = false;
+        $ret = false;
 
-	if ( is_object( $object ) )
-	{
- 	    $newVersion = $object->attribute( 'version' );
-	    $oldVersion = $lastVersion->attribute( 'version' );
+        if ( is_object( $object ) )
+        {
+            $newVersion = $object->currentVersion();
+            $oldVersion = $lastVersion;
 
-	    $newObject = $object;
-	    $oldObject = $lastVersion;
+            if ( is_object( $oldVersion ) && is_object( $newVersion ) )
+            {
+                // Fetch datamaps
+                $oldAttributes = $oldVersion->dataMap();
+                $newAttributes = $newVersion->dataMap();
 
-	    if ( is_object( $oldObject ) && is_object( $newObject ) )
-	    {
-	      // Fetch datamaps
-	      $oldAttributes = $oldObject->dataMap();
-	      $newAttributes = $newObject->dataMap();
+                // Fetch attribute diff output
+                foreach ( $oldAttributes as $attribute )
+                {
+                    $newAttr = $newAttributes[$attribute->attribute( 'contentclass_attribute_identifier' )];
+                    $contentClassAttr = $newAttr->attribute( 'contentclass_attribute' );
+                    $extraOptions = array();
+                    $diff[$contentClassAttr->attribute( 'id' )] = $contentClassAttr->diff( $attribute, $newAttr, $extraOptions );
+                }
 
-	      // Fetch attribute diff output
-	      foreach ( $oldAttributes as $attribute )
-	      {
-		$newAttr = $newAttributes[$attribute->attribute( 'contentclass_attribute_identifier' )];
-		$contentClassAttr = $newAttr->attribute( 'contentclass_attribute' );
-		$diff[$contentClassAttr->attribute( 'id' )] = $contentClassAttr->diff( $attribute, $newAttr, $extraOptions );
-	      }
+                // Prepare template display of attribute diff output
+                include_once( 'kernel/common/template.php' );
+                $tpl = templateInit();
 
-	      // Prepare template display of attribute diff output
-	      include_once( 'kernel/common/template.php' );
-	      $tpl = templateInit();
+                $tpl->setVariable( 'oldVersion', $oldVersion->attribute( 'version' ) );
+                $tpl->setVariable( 'oldVersionObject', $oldVersion );
 
-	      $tpl->setVariable( 'oldVersion', $oldVersion );
-	      $tpl->setVariable( 'oldVersionObject', $oldObject );
+                $tpl->setVariable( 'newVersion', $newVersion->attribute( 'version' ) );
+                $tpl->setVariable( 'newVersionObject', $newVersion );
 
-	      $tpl->setVariable( 'newVersion', $newVersion );
-	      $tpl->setVariable( 'newVersionObject', $newObject );
+                $tpl->setVariable( 'object', $object );
+                $tpl->setVariable( 'diff', $diff );
 
-	      $tpl->setVariable( 'object', $object );
-	      $tpl->setVariable( 'diff', $diff );
-
-	      $diff = $tpl->fetch( 'design:diff_versions.tpl' );
-	      $ret = $diff;
-	    }
-	}
+                $diff = $tpl->fetch( 'design:diff_versions.tpl' );
+                $ret = $diff;
+            }
+        }
 
         return array( 'result' => $ret );
     }
