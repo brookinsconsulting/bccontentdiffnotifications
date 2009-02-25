@@ -44,9 +44,8 @@ class BcContentDiffNotificationFunctionCollection
     /*!
      Fetch the last content object version with a status of 'archived'
     */
-    function &fetchLastObjectVersionFetch( $objectID )
+    function fetchLastObjectVersionFetch( $objectID )
     {
-        include_once( 'kernel/classes/ezcontentobject.php' );
         $ret = false;
 
         // First fetch content object
@@ -56,7 +55,7 @@ class BcContentDiffNotificationFunctionCollection
         if ( is_object( $object ) )
         {
             // Fetch the current version
-            $version =& $object->currentVersion();
+            $version = $object->currentVersion();
             $lastVersion = $version->attribute( 'version' ) -1;
             $lastObject = $object->version( $lastVersion );
 
@@ -69,7 +68,7 @@ class BcContentDiffNotificationFunctionCollection
     /*!
      Fetch the content diff of the current and last version of a content object
     */
-    function &fetchDiffVersionsFetch( $object, $lastVersion )
+    function fetchDiffVersionsFetch( $object, $lastVersion )
     {
         $ret = false;
 
