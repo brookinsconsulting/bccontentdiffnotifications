@@ -86,15 +86,17 @@ class BcContentDiffNotificationFunctionCollection
                 // Fetch attribute diff output
                 foreach ( $oldAttributes as $attribute )
                 {
-                    $newAttr = $newAttributes[$attribute->attribute( 'contentclass_attribute_identifier' )];
-                    $contentClassAttr = $newAttr->attribute( 'contentclass_attribute' );
-                    $extraOptions = array();
-                    $diff[$contentClassAttr->attribute( 'id' )] = $contentClassAttr->diff( $attribute, $newAttr, $extraOptions );
+                    if ( isset( $newAttributes[ $attribute->attribute( 'contentclass_attribute_identifier' ) ] ) )
+                    {
+                        $newAttr = $newAttributes[ $attribute->attribute( 'contentclass_attribute_identifier' ) ];
+                        $contentClassAttr = $newAttr->attribute( 'contentclass_attribute' );
+                        $extraOptions = array();
+                        $diff[ $contentClassAttr->attribute( 'id' ) ] = $contentClassAttr->diff( $attribute, $newAttr, $extraOptions );
+                    }
                 }
 
                 // Prepare template display of attribute diff output
-                include_once( 'kernel/common/template.php' );
-                $tpl = templateInit();
+                $tpl = eZTemplate::factory();
 
                 $tpl->setVariable( 'oldVersion', $oldVersion->attribute( 'version' ) );
                 $tpl->setVariable( 'oldVersionObject', $oldVersion );
